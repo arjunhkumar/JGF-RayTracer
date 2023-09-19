@@ -18,23 +18,14 @@
 *                                                                         *
 **************************************************************************/
 
+---------------------------------------------------------------------------
+Modified version of JGF Raytracer benchmark that supports inlineable fields.
+---------------------------------------------------------------------------
 
 Compiling the benchmark suite
 -----------------------------
 
- 1. Add the top directory (threadv1.0, the directory where this README 
-   file is located) to your CLASSPATH. 
-
- 2. Change directory to jgfutil.  
-
- 3. Compile all the  .java files in this directory (e.g. javac *.java) 
-
- 4. Change directory to section1.  
-
- 5. Compile all the  .java files in this directory (e.g. javac *.java) 
-    The compiler should be able to follow all dependencies. 
-
- 6. Repeat steps 4 and 5 for section2 and section3.
+1. Run the command mvn clean package.
  
 Running the benchmark suite
 ---------------------------
