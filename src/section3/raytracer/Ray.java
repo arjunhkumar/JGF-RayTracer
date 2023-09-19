@@ -31,7 +31,10 @@ final public class Ray {
 	public Ray(Vec pnt, Vec dir) {
 		P = new Vec(pnt.x, pnt.y, pnt.z);
 		D = new Vec(dir.x, dir.y, dir.z);
-		D.normalize();
+		Vec v = D.normalize();
+		if(!v.isNull) {
+			D = v;
+		}
 	}
 
 	public Ray() {
@@ -41,6 +44,11 @@ final public class Ray {
 
 	public Vec point(double t) {
 		return new Vec(P.x + D.x * t, P.y + D.y * t, P.z + D.z * t);
+	}
+	
+	/** JGF-Valhalla. Manually added method to replace add method in Vec class. */
+	public void addD(Vec a) {
+		this.D = new Vec(this.D.x+a.x, this.D.y+a.y, this.D.z+a.z);
 	}
 
 	public String toString() {

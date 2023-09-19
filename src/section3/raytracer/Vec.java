@@ -28,22 +28,24 @@ package raytracer;
 /**
  * This class reflects the 3d vectors used in 3d computations
  */
-public class Vec implements java.io.Serializable {
+public primitive class Vec implements java.io.Serializable {
 
   /**
    * The x coordinate
    */
-  public double x; 
+  public final double x; 
 
   /**
    * The y coordinate
    */
-  public double y;
+  public final double y;
 
   /**
    * The z coordinate
    */
-  public double z;
+  public final double z;
+  
+  public final boolean isNull;
 
   /**
    * Constructor
@@ -55,6 +57,7 @@ public class Vec implements java.io.Serializable {
     x = a;
     y = b;
     z = c;
+    isNull = false;
   }
 
   /**
@@ -64,6 +67,7 @@ public class Vec implements java.io.Serializable {
     x = a.x;
     y = a.y;
     z = a.z;
+    isNull = false;
   }
   /**
    * Default (0,0,0) constructor
@@ -72,17 +76,28 @@ public class Vec implements java.io.Serializable {
     x = 0.0;
     y = 0.0; 
     z = 0.0;
+    isNull = false;
   }
 
+  /**
+   * JGF Valhalla
+   */
+  public Vec(boolean isNull) {
+	  this.x = 0.0;
+	  this.y = 0.0; 
+	  this.z = 0.0;
+	  this.isNull = isNull;
+  }
+  
   /**
    * Add a vector to the current vector
    * @param: a The vector to be added
    */
-  public final void add(Vec a) {
-    x+=a.x;
-    y+=a.y;
-    z+=a.z;
-  }  
+//  public final void add(Vec a) {
+//    x+=a.x;
+//    y+=a.y;
+//    z+=a.z;
+//  }  
 
   /**
    * adds: Returns a new vector such as
@@ -93,15 +108,14 @@ public class Vec implements java.io.Serializable {
   }
     
   /**
+   * Modified method. JGF-Valhalla
    * Adds vector such as:
    * this+=sB
    * @param: s The multiplier
    * @param: b The vector to be added
    */
-  public final void adds(double s,Vec b){
-      x+=s*b.x;
-      y+=s*b.y;
-      z+=s*b.z;
+  public final Vec adds(double s,Vec b){
+	 return new Vec(x+s*b.x,  y+s*b.y, z+s*b.z);
   }
 
   /**
@@ -110,17 +124,17 @@ public class Vec implements java.io.Serializable {
   public static Vec sub(Vec a, Vec b) {
     return new Vec(a.x - b.x, a.y - b.y, a.z - b.z);
   }
-
+  
   /**
+   * JGF-Valhalla
    * Substracts two vects and places the results in the current vector
    * Used for speedup with local variables -there were too much Vec to be gc'ed
    * Consumes about 10 units, whether sub consumes nearly 999 units!! 
    * cf thinking in java p. 831,832
+ * @return 
    */
-  public final void sub2(Vec a,Vec b) {
-    this.x=a.x-b.x;
-    this.y=a.y-b.y;
-    this.z=a.z-b.z;
+  public final Vec sub2(Vec a,Vec b) {
+	return new Vec(a.x-b.x,a.y-b.y,a.z-b.z);
   }
 
   public static Vec mult(Vec a, Vec b) {
@@ -145,33 +159,31 @@ public class Vec implements java.io.Serializable {
 	      a * A.z + b * B.z);
   }
 
-  public final void comb2(double a,Vec A,double b,Vec B) {
-    x=a * A.x + b * B.x;
-    y=a * A.y + b * B.y;
-    z=a * A.z + b * B.z;      
+  //JGF-Valhalla
+//  public final void comb2(double a,Vec A,double b,Vec B) {
+//    x=a * A.x + b * B.x;
+//    y=a * A.y + b * B.y;
+//    z=a * A.z + b * B.z;      
+//  }
+
+  // JGF-Valhalla
+  public final Vec scale(double t) {
+    return new Vec (x *t, y * t, z * t);
   }
 
-  public final void scale(double t) {
-    x *= t;
-    y *= t;
-    z *= t;
+  //JGF-Valhalla
+  public final Vec negate() {
+	  return new Vec (-x,-y,-z);
   }
 
-  public final void negate() {
-    x = -x;
-    y = -y;
-    z = -z;
-  }
-
-  public final double normalize() {
+  //JGF-Valhalla
+  public final Vec normalize() {
     double len;
     len = Math.sqrt(x*x + y*y + z*z);
     if (len > 0.0) {
-      x /= len;
-      y /= len;
-      z /= len;
+      return new Vec(x / len,y / len,z / len);
     }
-    return len;
+    return new Vec(true);
   }
 
   public final String toString() {

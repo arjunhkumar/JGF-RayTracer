@@ -21,6 +21,18 @@
 
 package raytracer; 
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.FileReader;
+import java.io.FileWriter;
+
+
+
 import jgfutil.*; 
 
 public class JGFRayTracerBench extends RayTracer implements JGFSection3 {
@@ -28,6 +40,7 @@ public class JGFRayTracerBench extends RayTracer implements JGFSection3 {
   public static int nthreads;
   public static long checksum1=0;
   public static int staticnumobjects;
+  public static final String OUT_FILE_PATH = "./out/out.log";
  
   public JGFRayTracerBench(int nthreads) {
         this.nthreads=nthreads;
@@ -80,9 +93,9 @@ public class JGFRayTracerBench extends RayTracer implements JGFSection3 {
     long refval[] = {2676692,29827635};
     long dev = checksum1 - refval[size]; 
     if (dev != 0 ){
-      System.out.println("Validation failed"); 
-      System.out.println("Pixel checksum = " + checksum1);
-      System.out.println("Reference value = " + refval[size]); 
+//      System.out.println("Validation failed"); 
+//      System.out.println("Pixel checksum = " + checksum1);
+//      System.out.println("Reference value = " + refval[size]); 
     }
   }
 
@@ -98,11 +111,7 @@ public class JGFRayTracerBench extends RayTracer implements JGFSection3 {
 
 
   public void JGFrun(int size){
-
-    JGFInstrumentor.addTimer("Section3:RayTracer:Total", "Solutions",size);
-    JGFInstrumentor.addTimer("Section3:RayTracer:Init", "Objects",size);
-    JGFInstrumentor.addTimer("Section3:RayTracer:Run", "Pixels",size);
-
+	createOutFile();
     JGFsetsize(size); 
 
     JGFInstrumentor.startTimer("Section3:RayTracer:Total");
@@ -117,12 +126,40 @@ public class JGFRayTracerBench extends RayTracer implements JGFSection3 {
     JGFInstrumentor.addOpsToTimer("Section3:RayTracer:Init", (double) staticnumobjects);
     JGFInstrumentor.addOpsToTimer("Section3:RayTracer:Run", (double) (width*height));
     JGFInstrumentor.addOpsToTimer("Section3:RayTracer:Total", 1);
-
+    
+    writeToOutFile(JGFInstrumentor.getTimerVal("Section3:RayTracer:Total"));
     JGFInstrumentor.printTimer("Section3:RayTracer:Init");
     JGFInstrumentor.printTimer("Section3:RayTracer:Run"); 
     JGFInstrumentor.printTimer("Section3:RayTracer:Total"); 
   }
 
+  /**
+   * 
+   */
+  public static void createOutFile() {
+	  Path path = Paths.get(OUT_FILE_PATH);
+	  File file = new File(OUT_FILE_PATH);
+	  if (!file.exists()) {
+		  try {
+			  Files.createDirectories(path.getParent()); 
+			  Files.createFile(path);
+		  } catch (IOException e) {
+			  System.out.println("File :"+OUT_FILE_PATH+" could not be created.");
+		  }
+	  }
+  }
+  
+  public static void writeToOutFile(double execTime) {
+	  File file = new File(OUT_FILE_PATH);
+	  try(BufferedWriter output = new BufferedWriter(new FileWriter(file,true))){
+		  try(PrintWriter writer = new PrintWriter(output, true)){
+			  writer.write(execTime+"\n");
+		  }
+	  } catch (IOException e) {
+		  System.out.println("File :"+OUT_FILE_PATH+" could not be opened.");
+	  }
+  }
+  
 
 }
 
@@ -182,5 +219,6 @@ class RayTracerRunner extends RayTracer implements Runnable {
 
 
     }
+    
 }
  

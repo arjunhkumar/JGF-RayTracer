@@ -37,10 +37,16 @@ public class JGFRayTracerBenchSizeB{
   }
 
     JGFInstrumentor.printHeader(3,1,nthreads);
-
-    JGFRayTracerBench rtb = new JGFRayTracerBench(nthreads); 
-    rtb.JGFrun(1);
- 
+    JGFInstrumentor.addTimer("Section3:RayTracer:Total", "Solutions",1);
+    JGFInstrumentor.addTimer("Section3:RayTracer:Init", "Objects",1);
+    JGFInstrumentor.addTimer("Section3:RayTracer:Run", "Pixels",1);
+    for(int i=0;i<10;i++) {
+    	JGFRayTracerBench rtb = new JGFRayTracerBench(nthreads); 
+        rtb.JGFrun(1);
+        JGFInstrumentor.resetTimer("Section3:RayTracer:Total");
+        JGFInstrumentor.resetTimer("Section3:RayTracer:Init");
+        JGFInstrumentor.resetTimer("Section3:RayTracer:Run");
+    }
   }
 }
 

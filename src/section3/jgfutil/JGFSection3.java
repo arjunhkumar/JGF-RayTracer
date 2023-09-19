@@ -13,41 +13,20 @@
 *                email: epcc-javagrande@epcc.ed.ac.uk                     *
 *                                                                         *
 *                                                                         *
-*      This version copyright (c) The University of Edinburgh, 2001.      *
+*      This version copyright (c) The University of Edinburgh, 1999.      *
 *                         All rights reserved.                            *
 *                                                                         *
 **************************************************************************/
 
 
-import raytracer.*;
-import jgfutil.*;
+package jgfutil; 
 
-public class JGFRayTracerBenchSizeA{ 
-
-  public static int nthreads;
-
-  public static void main(String argv[]){
-
-  if(argv.length != 0 ) {
-    nthreads = Integer.parseInt(argv[0]);
-  } else {
-    System.out.println("The no of threads has not been specified, defaulting to 1");
-    System.out.println("  ");
-    nthreads = 1;
-  }
-
-    JGFInstrumentor.printHeader(3,0,nthreads);
-    JGFInstrumentor.addTimer("Section3:RayTracer:Total", "Solutions",0);
-    JGFInstrumentor.addTimer("Section3:RayTracer:Init", "Objects",0);
-    JGFInstrumentor.addTimer("Section3:RayTracer:Run", "Pixels",0);
-    for(int i=0;i<10;i++) {
-    	JGFRayTracerBench rtb = new JGFRayTracerBench(nthreads); 
-        rtb.JGFrun(0);
-        JGFInstrumentor.resetTimer("Section3:RayTracer:Total");
-        JGFInstrumentor.resetTimer("Section3:RayTracer:Init");
-        JGFInstrumentor.resetTimer("Section3:RayTracer:Run");
-    }
-  }
+public interface JGFSection3 {
+  public void JGFsetsize(int size);
+  public void JGFinitialise();
+  public void JGFapplication();
+  public void JGFvalidate();
+  public void JGFtidyup();  
+  public void JGFrun(int size); 
 }
-
-
+ 

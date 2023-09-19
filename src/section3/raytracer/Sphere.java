@@ -41,7 +41,7 @@ public class Sphere extends Primitive implements java.io.Serializable {
   public Isect intersect(Ray ry) {
     double b, disc, t;
     Isect ip;
-    v.sub2(c, ry.P);
+    v = v.sub2(c, ry.P);
     b = Vec.dot(v, ry.D);
     disc = b*b - Vec.dot(v, v) + r2;
     if (disc < 0.0) {
@@ -63,7 +63,10 @@ public class Sphere extends Primitive implements java.io.Serializable {
   public Vec normal(Vec p) {
     Vec r;
     r = Vec.sub(p, c);
-    r.normalize();
+    Vec v = r.normalize();
+    if(v.isNull) {
+    	r = v;
+	}
     return r;
   }
 

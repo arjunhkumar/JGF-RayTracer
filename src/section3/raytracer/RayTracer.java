@@ -26,7 +26,6 @@ package raytracer;
 
 public class RayTracer { 
 
-
   Scene scene;
   /**
    * Lights for the rendering scene
@@ -193,10 +192,13 @@ public void render(Interval interval)
 
     viewVec = Vec.sub(view.at, view.from);
     
-    viewVec.normalize();
+    Vec v = viewVec.normalize();
+    if(!v.isNull) {
+    	viewVec = v;
+	}
     
     Vec tmpVec = new Vec(viewVec);
-    tmpVec.scale(Vec.dot(view.up, viewVec));
+    tmpVec = tmpVec.scale(Vec.dot(view.up, viewVec));
     
     Vec upVec = Vec.sub(view.up, tmpVec);
     upVec.normalize();
@@ -221,19 +223,19 @@ public void render(Interval interval)
     // All loops are reversed for 'speedup' (cf. thinking in java p331)
     
     // For each line
-
     for(y = interval.yfrom+interval.threadid; y < interval.yto; y+=JGFRayTracerBench.nthreads) {
-
+    	
       ylen = (double)(2.0 * y) / (double)interval.width - 1.0;
       // System.out.println("Doing line " + y);
       // For each pixel of the line
       for(x = 0; x < interval.width; x++) {
+    	  
 	xlen = (double)(2.0 * x) / (double)interval.width - 1.0;
 	r.D = Vec.comb(xlen, leftVec, ylen, upVec);
-	r.D.add(viewVec);
+	// JGF-Valhalla.
+	r.addD(viewVec);
 	r.D.normalize();
 	col = trace(0, 1.0, r);
-	
 	// computes the color of the ray
 	red = (int)(col.x * 255.0);
 	if (red > 255)
@@ -253,9 +255,10 @@ public void render(Interval interval)
         // System.out.println(red + " " + green + " " + blue); 
 	// Sets the pixels
 	row[pixCounter++] =  alpha | (red << 16) | (green << 8) | (blue);
+	
       } // end for (x)
     } // end for (y)
-
+//    System.out.println("Time taken for rendering: "+sum+" ms");
     }
 
   boolean intersect(Ray r, double maxt) {
@@ -297,7 +300,10 @@ public void render(Interval interval)
   Vec SpecularDirection(Vec I, Vec N) {
     Vec r;
     r = Vec.comb(1.0/Math.abs(Vec.dot(I, N)), I, 2.0, N);
-    r.normalize();
+    Vec v = r.normalize();
+    if(!v.isNull) {
+    	r = v;
+	}
     return r;
   }
   
@@ -313,9 +319,12 @@ public void render(Interval interval)
     c1 = -Vec.dot(I, N);
     cs2 = 1.0 - eta * eta * (1.0 - c1 * c1);
     if (cs2 < 0.0)
-      return null;
+      return new Vec(true);
     r = Vec.comb(eta, I, eta * c1 - Math.sqrt(cs2), N);
-    r.normalize();
+    Vec v = r.normalize();
+    if(!v.isNull) {
+    	r = v;
+	}
     return r;
   }
   
@@ -343,9 +352,13 @@ public void render(Interval interval)
 
     // Computes the effectof each light
     for(l = 0; l < lights.length; l++) {
-      L.sub2(lights[l].pos, P);
+    	//      L.sub2(lights[l].pos, P);
+    	// JGF-Valhalla
+    	L =  L.sub2(lights[l].pos, P);
       if (Vec.dot(N, L) >= 0.0) {
-	t = L.normalize();
+    	// JGF-Valhalla
+    t = Math.sqrt(L.x*L.x + L.y*L.y + L.z*L.z);
+	L.normalize();
 
 	tRay.P=P;
 	tRay.D=L;
@@ -354,15 +367,14 @@ public void render(Interval interval)
 	if (Shadow(tRay, t) > 0) {
 	  diff = Vec.dot(N, L) * surf.kd *
 	    lights[l].brightness;
-
-	  col.adds(diff,surf.color);
+	  // JGF-Valhalla
+	  col = col.adds(diff,surf.color);
 	  if (surf.shine > 1e-6) {
 	    spec = Vec.dot(R, L);
 	    if (spec > 1e-6) {
 	      spec = Math.pow(spec, surf.shine);
-	      col.x += spec;
-	      col.y += spec;
-	      col.z += spec;
+	      // JGF-Valhalla
+	      col = new Vec(col.x + spec, col.y + spec, col.z + spec);
 	    }
 	  }
 	}
@@ -385,7 +397,7 @@ public void render(Interval interval)
     }
 
     // garbaging...
-    tcol=null;
+//    tcol=null;
     surf=null;
 
     return col;
@@ -397,22 +409,25 @@ public void render(Interval interval)
   Vec trace (int level, double weight, Ray r) {
     Vec P, N;
     boolean hit;
-    
     // Checks the recursion level
     if (level > 6) {
       return new Vec();
     }
-    
+//    startTime = System.currentTimeMillis();
     hit = intersect(r, 1e6);
     if (hit) {
       P = r.point(inter.t);
       N = inter.prim.normal(P);
       if (Vec.dot(r.D, N) >= 0.0) {
-	N.negate();
+    	  N = N.negate();
       }
+//    endTime = System.currentTimeMillis();
+//  	sum += (endTime-startTime);
       return shade(level, weight, P, N, r.D, inter);
     }
     // no intersection --> col = 0,0,0
+//    endTime = System.currentTimeMillis();
+//  	sum += (endTime-startTime);
     return voidVec;
   }
 
