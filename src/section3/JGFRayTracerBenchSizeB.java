@@ -40,7 +40,7 @@ public class JGFRayTracerBenchSizeB{
     JGFInstrumentor.addTimer("Section3:RayTracer:Total", "Solutions",1);
     JGFInstrumentor.addTimer("Section3:RayTracer:Init", "Objects",1);
     JGFInstrumentor.addTimer("Section3:RayTracer:Run", "Pixels",1);
-    for(int i=0;i<10;i++) {
+    for(int i=0;i<100;i++) {
     	JGFRayTracerBench rtb = new JGFRayTracerBench(nthreads); 
         rtb.JGFrun(1);
         JGFInstrumentor.resetTimer("Section3:RayTracer:Total");
